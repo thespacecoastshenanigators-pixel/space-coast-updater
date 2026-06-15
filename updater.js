@@ -4,7 +4,7 @@ const axios = require('axios');
 const ADALO_API_KEY = 'a5pk3x3uz3ojd92usc8sds4zq';
 const ADALO_APP_ID = 'f87f7d0f-a56c-47f6-b00b-ef79a9387e2a';
 const ADALO_COLLECTION_ID = 'space-coast-events-CSV';
-const AI_API_KEY = 'YOUR_OPENAI_OR_GEMINI_API_KEY'; // Replace with your AI Provider Key
+const AI_API_KEY = 'YOUR_OPENAI_OR_GEMINI_API_KEY'; //a5pk3x3uz3ojd92usc8sds4zq
 
 // 1. Scrape raw text content from local entertainment sites
 async function scrapeWebpage(url) {
@@ -70,8 +70,8 @@ async function pushToAdalo(events) {
 async function runAutomation() {
     console.log("Starting weekly Space Coast events sync...");
     
-    const brevardLiveText = await scrapeWebpage('https://brevardlive.com/music-gigs/'); 
-    const destinationBrevardText = await scrapeWebpage('https://destinationbrevard.com/events/');
+    const brevardLiveText = await scrapeWebpage(''https://brevardlive.com/live-entertainment/');
+    const destinationBrevardText = await scrapeWebpage(''https://destinationbrevard.com/');
 
     const combinedText = brevardLiveText + " " + destinationBrevardText;
     
