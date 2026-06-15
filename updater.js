@@ -70,7 +70,7 @@ async function pushToAdalo(events) {
 async function runAutomation() {
     console.log("Starting weekly Space Coast events sync...");
     
-    const brevardLiveText = await scrapeWebpage(''https://brevardlive.com/live-entertainment/');
+    const brevardLiveText = await scrapeWebpage('https://brevardlive.com/live-entertainment/');
     const destinationBrevardText = await scrapeWebpage(''https://destinationbrevard.com/');
 
     const combinedText = brevardLiveText + " " + destinationBrevardText;
