@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 // Your Final Verified Configuration
-const ADALO_API_KEY = ADALO_API_KEY = process.env.ADALO_API_KEY;
+const ADALO_API_KEY = process.env.ADALO_API_KEY;
 const ADALO_APP_ID = 'f87f7d0f-a56c-47f6-b00b-ef79a9387e2a';
 const ADALO_COLLECTION_ID = 'space-coast-events-CSV';
 const AI_API_KEY = AI_API_KEY = process.env.GEMINI_API_KEY;
