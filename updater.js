@@ -1,17 +1,18 @@
 const axios = require('axios');
 
-// Your Final Verified Configuration
+// Secure environment abstractions mapping to host configurations
 const ADALO_API_KEY = process.env.ADALO_API_KEY; 
 const ADALO_APP_ID = 'f87f7d0f-a56c-47f6-b00b-ef79a9387e2a';
 const ADALO_COLLECTION_ID = 'space-coast-events-CSV';
-const AI_API_KEY = process.env.GEMINI_API_KEY; // Cleaned and fixed right here!
+const AI_API_KEY = process.env.GEMINI_API_KEY;
 
-// 1. Scrape raw text content from local entertainment sites
+// Phase 1: Scrape text string buffers from targets while masking fingerprints
 async function scrapeWebpage(url) {
     try {
         const response = await axios.get(url, {
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
         });
+        // Wipe heavy HTML layout wrappers, scripts, and padding elements
         return response.data.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     } catch (error) {
         console.error(`Error scraping ${url}:`, error.message);
@@ -19,7 +20,7 @@ async function scrapeWebpage(url) {
     }
 }
 
-// 2. Use Google Gemini AI to structure the messy text data
+// Phase 2: Deploy Gemini AI context engine to translate chaotic blocks into structured JSON with addresses
 async function parseEventsWithAI(rawText) {
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${AI_API_KEY}`;
@@ -28,7 +29,10 @@ async function parseEventsWithAI(rawText) {
             contents: [{
                 parts: [{
                     text: `Extract all live music gigs and community events for the upcoming week from this text. 
-                    Return ONLY a raw JSON array of objects with keys: "Name", "Venue", and "Day and time".
+                    Return ONLY a raw JSON array of objects with keys: "Name", "Venue", "Day and time", and "Address".
+                    
+                    CRITICAL: For the "Address" key, use your knowledge of Brevard County, Florida to provide the full physical street address, city, and state for the venue (e.g., "3191 Dixie Hwy NE, Palm Bay, FL" or "315 Christopher Columbus Dr, Port Canaveral, FL").
+                    
                     Do not wrap the response in markdown blocks like \`\`\`json or include extra text.
                     
                     Raw Text: ${rawText.substring(0, 40000)}`
@@ -47,7 +51,7 @@ async function parseEventsWithAI(rawText) {
     }
 }
 
-// 3. Inject the clean events straight into your live Adalo feed
+// Phase 3: Loop processed array datasets into Adalo database collection endpoints with mapping support
 async function pushToAdalo(events) {
     const url = `https://api.adalo.com/v0/apps/${ADALO_APP_ID}/collections/${ADALO_COLLECTION_ID}`;
     
@@ -57,6 +61,7 @@ async function pushToAdalo(events) {
                 "Name": event.Name,
                 "Venue": event.Venue,
                 "Day and time": event["Day and time"], 
+                "Geographic Location": event.Address, // Direct map link payload!
                 "Approved": true 
             }, {
                 headers: {
@@ -64,26 +69,27 @@ async function pushToAdalo(events) {
                     'Content-Type': 'application/json'
                 }
             });
-            console.log(`Successfully added: ${event.Name} at ${event.Venue}`);
+            console.log(`Successfully mapped and added: ${event.Name} at ${event.Venue} (${event.Address})`);
         } catch (error) {
             console.error(`Failed to push event ${event.Name}:`, error.response?.data || error.message);
         }
     }
 }
 
-// Execution sequence
+// Master Orchestration Block
 async function runAutomation() {
-    console.log("Starting weekly Space Coast events sync...");
+    console.log("Starting weekly Space Coast events sync with Map locations...");
     
+    // Live verified Brevard County target feeds
     const brevardLiveText = await scrapeWebpage('https://www.brevardlive.com/events'); 
     const destinationBrevardText = await scrapeWebpage('https://destinationbrevard.com/');
 
     const combinedText = brevardLiveText + " " + destinationBrevardText;
     
-    console.log("Processing text strings with AI extractors...");
+    console.log("Processing text strings with AI address matching extractors...");
     const cleanEvents = await parseEventsWithAI(combinedText);
     
-    console.log(`Extracted ${cleanEvents.length} events. Injecting directly to Adalo...`);
+    console.log(`Extracted ${cleanEvents.length} localized events. Injecting directly to Adalo...`);
     await pushToAdalo(cleanEvents);
     
     console.log("Automation pass completed successfully!");
